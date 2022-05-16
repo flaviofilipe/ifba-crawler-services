@@ -1,0 +1,4 @@
+wheel
+flask
+psycopg2-binary
+python-dotenv

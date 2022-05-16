@@ -1,0 +1,44 @@
+version: "3"
+services:
+  ff-web:
+    build: api
+    container_name: ff-web
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./api:/code
+    depends_on:
+      - ff-database
+    networks:
+      - ff-network
+
+  ff-database:
+    image: postgres
+    container_name: ff-database
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - ./database/data:/var/lib/postgresql/data
+      - ./database/notices.sql:/docker-entrypoint-initdb.d/notices.sql
+      - ./database/docker_config/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
+    env_file:
+      - .env
+    networks:
+      - ff-network
+
+  ff-crawler:
+    build: crawler
+    container_name: ff-crawler
+    command: python main.py
+    volumes:
+      - ./api:/code
+    depends_on:
+      - ff-web
+    networks:
+      - ff-network
+
+networks:
+  ff-network:
+    name: ff-network
